@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
 import org.apache.cordova.*;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
