@@ -1,80 +1,71 @@
 package com.example.proximitysensor;
 
+import org.apache.cordova.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import org.apache.cordova.*;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class ProximitySensor extends CordovaPlugin implements SensorEventListener {
 
     private SensorManager sensorManager;
     private Sensor proximitySensor;
     private CallbackContext callbackContext;
-    private boolean isListening = false;
 
     @Override
-    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals("start")) {
             this.callbackContext = callbackContext;
-            startSensor();
+            startListening();
             return true;
         } else if (action.equals("stop")) {
-            stopSensor();
+            stopListening();
             callbackContext.success("Stopped");
             return true;
         }
         return false;
     }
 
-    private void startSensor() {
-        if (!isListening) {
-            sensorManager = (SensorManager) cordova.getActivity().getSystemService(Context.SENSOR_SERVICE);
+    private void startListening() {
+        sensorManager = (SensorManager) cordova.getActivity().getSystemService(Context.SENSOR_SERVICE);
+        if (sensorManager != null) {
             proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-
             if (proximitySensor != null) {
                 sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
-                isListening = true;
             } else {
                 callbackContext.error("Proximity sensor not available");
             }
         }
     }
 
-    private void stopSensor() {
-        if (isListening && sensorManager != null) {
+    private void stopListening() {
+        if (sensorManager != null) {
             sensorManager.unregisterListener(this);
-            isListening = false;
         }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        float distance = event.values[0];
-        boolean isClose = distance < proximitySensor.getMaximumRange();
-
-        JSONObject data = new JSONObject();
+        boolean isNear = event.values[0] < proximitySensor.getMaximumRange();
         try {
-            data.put("distance", distance);
-            data.put("isClose", isClose);
+            JSONObject result = new JSONObject();
+            result.put("isNear", isNear);
+            result.put("distance", event.values[0]);
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
+            pluginResult.setKeepCallback(true);
+            callbackContext.sendPluginResult(pluginResult);
         } catch (JSONException e) {
             e.printStackTrace();
-        }
-
-        if (callbackContext != null) {
-            PluginResult result = new PluginResult(PluginResult.Status.OK, data);
-            result.setKeepCallback(true);
-            callbackContext.sendPluginResult(result);
         }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Não usado
+        
     }
 }
