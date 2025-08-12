@@ -1,0 +1,22 @@
+{
+  "name": "cordova-plugin-proximity-sensor",
+  "version": "1.0.0",
+  "description": "Cordova plugin for reading the device proximity sensor",
+  "cordova": {
+    "id": "cordova-plugin-proximity-sensor",
+    "platforms": [
+      "android"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CallyelAlves/cordova-plugin-proximity-sensor.git"
+  },
+  "keywords": [
+    "cordova",
+    "proximity",
+    "sensor",
+    "ecosystem:cordova",
+    "cordova-android"
+  ]
+}
